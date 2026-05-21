@@ -1,6 +1,6 @@
 # AI Otomasyon Ajansı — Durum ve Yapılacaklar
 
-> Son güncelleme: 2026-05-21 — Modül 1 (GMB) tamam, çok modüllü mimari planlandı
+> Son güncelleme: 2026-05-21 — Modül 1 (GMB) tamam, modüler mimari uygulandı, GitHub entegre edildi
 
 ---
 
@@ -23,18 +23,12 @@
 ## Modül 1 — GMB Yorum Yanıtlama ✅
 
 ### Çalışan Özellikler
-- [x] Proje iskeleti (18 dosya) tamam
-- [x] FastAPI tüm endpoint'ler çalışıyor
-- [x] Airtable CRUD (Businesses, Reviews, ResponseLogs)
-- [x] Groq / Llama 3.3 70B entegrasyonu
-- [x] SEO-GEO prompt template
-- [x] SEO skorlama servisi
-- [x] Mock GMB yorum üreticisi
-- [x] Streamlit Dashboard (4 sayfa)
-- [x] APScheduler arka plan işleri
-- [x] Sentiment analizi (rating + keyword hibrit)
-- [x] Retry logic (exponential backoff, 429/503 handling)
-- [x] CustomPrompt çalışıyor
+- [x] Modüler mimariye geçiş tamamlandı (7 adım)
+- [x] `backend/modules/` + `base.py` + `module_manager.py`
+- [x] Eski servisler taşındı, gemini_service.py silindi
+- [x] GitHub repo oluşturuldu + ilk push
+- [x] Airtable `GMB_Active` checkbox'ı eklendi
+- [x] Proje rehberi (`docs/proje-rehberi.md`) oluşturuldu
 
 ### Bekleyen
 - [ ] Gerçek GMB API entegrasyonu (`backend/modules/gmb_reviews/api.py`)
@@ -42,15 +36,17 @@
 
 ---
 
-## Mimari Geçiş Planı
+## Mimari Durum
 
-### Kısa Vade (şu an - 1 hafta)
-- [ ] `backend/modules/` dizin yapısını oluştur
-- [ ] `backend/modules/base.py` — BaseModule abstract class
-- [ ] Mevcut GMB kodunu `backend/modules/gmb_reviews/` altına taşı
-- [ ] `backend/module_manager.py` — Airtable'dan modül durumlarını okuyan yönetici
-- [ ] Airtable Businesses tablosuna `GMB_Active` checkbox'ı ekle
-- [ ] Scheduler'ı module_manager'a bağla (sadece aktif modüller çalışsın)
+### Kısa Vade — ✅ TAMAMLANDI
+- [x] `backend/modules/` dizin yapısı
+- [x] `backend/modules/base.py` — BaseModule abstract class
+- [x] GMB kodu `backend/modules/gmb_reviews/` altına taşındı
+- [x] `backend/module_manager.py` — Airtable'dan modül durumlarını okuyor
+- [x] Airtable Businesses tablosuna `GMB_Active` checkbox'ı eklendi
+- [x] Scheduler module_manager'a bağlandı
+- [x] GitHub repo + gitignore + ilk commit
+- [x] Eski/gereksiz dosyalar silindi (review_processor, gmb_mock, gemini_service)
 
 ### Orta Vade (1-4 hafta)
 - [ ] Dashboard'u modül farkındalıklı hale getir (pasif modüller gizli)
@@ -66,39 +62,46 @@
 
 ---
 
-## Proje Yapısı (Güncel → Hedef)
+## Proje Yapısı (Güncel)
 
 ```
 GMB/
 ├── backend/
-│   ├── main.py                     # FastAPI app + scheduler
+│   ├── main.py                     # FastAPI app + scheduler (ModuleManager kullanır)
 │   ├── config.py                   # Ortam değişkenleri
-│   ├── models.py                   # Pydantic modeller
-│   ├── module_manager.py           # [YENİ] Modül yöneticisi
-│   ├── modules/                    # [YENİ] Tüm otomasyon modülleri
+│   ├── models.py                   # Pydantic modeller (+ gmb_active alanı)
+│   ├── module_manager.py           # Modül yöneticisi (GMB modülünü yönetir)
+│   ├── modules/                    # Tüm otomasyon modülleri
 │   │   ├── __init__.py
 │   │   ├── base.py                 # BaseModule abstract class
-│   │   └── gmb_reviews/            # Modül 1 (mevcut kodun taşınmış hali)
-│   │       ├── __init__.py
-│   │       ├── service.py          # GMB modül servisi
-│   │       ├── processor.py        # İş akışı (review_processor'dan)
-│   │       ├── mock.py             # Mock yorum üretici (gmb_mock'tan)
-│   │       └── api.py              # [YENİ] Gerçek GMB API entegrasyonu
+│   │   └── gmb_reviews/            # Modül 1: GMB Yorum Yanıtlama ✅
+│   │       ├── __init__.py         # GMBModule (BaseModule'den kalıtım)
+│   │       ├── processor.py        # ReviewProcessor — iş akışı
+│   │       └── mock.py             # MockGMB — sahte yorum üretici
 │   └── services/                   # Ortak servisler
 │       ├── airtable_service.py     # Airtable CRUD
-│       ├── llm_service.py          # LLM çağrıları
-│       └── seo_service.py          # SEO skorlama
+│       ├── llm_service.py          # LLM çağrıları (Groq)
+│       ├── seo_service.py          # SEO skorlama
+│       └── sentiment_service.py    # Sentiment analizi
 ├── dashboard/                      # Streamlit geliştirme dashboard'u
 │   ├── app.py
 │   ├── views/
+│   │   ├── overview.py
+│   │   ├── reviews.py
+│   │   ├── businesses.py
+│   │   └── reports.py
 │   └── components/
+│       ├── charts.py
+│       └── utils.py
 ├── scripts/
 │   └── seed_data.py
 ├── docs/
-│   └── merkezi-mimari-rehberi.md   # [YENİ] Detaylı mimari dokümanı
+│   ├── merkezi-mimari-rehberi.md   # Mimari tasarım dokümanı
+│   └── proje-rehberi.md            # Junior seviyesi proje rehberi
 ├── requirements.txt
 ├── .env.example
 ├── .env
+├── .gitignore
 ├── CLAUDE.md
 └── TODO.md                         # BU DOSYA
 ```
@@ -135,6 +138,7 @@ $env:PYTHONIOENCODING = 'utf-8'; python scripts/seed_data.py
 | Dashboard | http://localhost:8501 |
 | Groq Console | https://console.groq.com/keys |
 | Airtable | https://airtable.com |
+| GitHub | https://github.com/OzcanBarbaros/ai-automation-agency |
 
 ---
 
@@ -155,7 +159,14 @@ $env:PYTHONIOENCODING = 'utf-8'; python scripts/seed_data.py
 - CLAUDE.md, TODO.md güncellendi
 - Merkezi Mimari Rehberi oluşturuldu
 - Modül sistemi ve Airtable-based müşteri yönetimi tasarlandı
-- Sıfır kod onboarding mimarisi dokümante edildi
+
+### Session 4 — Modüler Mimari Uygulaması + GitHub
+- 7 adımda modüler mimariye geçildi (BaseModule, ModuleManager, GMBModule)
+- Eski servisler taşındı, gemini_service.py silindi
+- Airtable'a GMB_Active checkbox'ı eklendi
+- GitHub repo oluşturuldu, gh CLI kuruldu, ilk push yapıldı
+- `docs/proje-rehberi.md` junior seviyesinde yazıldı
+- Test: Tüm endpoint'ler çalışıyor, %100 response rate, 91.4 SEO skoru
 
 ---
 
@@ -163,4 +174,3 @@ $env:PYTHONIOENCODING = 'utf-8'; python scripts/seed_data.py
 
 1. **Windows konsol encoding**: Emoji/özel karakterler → `$env:PYTHONIOENCODING = 'utf-8'`
 2. **Streamlit sürümü**: 1.43.0'a sabitlendi
-3. **Gemini servisi hala diskte**: `backend/services/gemini_service.py` artık kullanılmıyor, silinebilir

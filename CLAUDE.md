@@ -41,13 +41,14 @@ GMB/
 │   │   ├── __init__.py
 │   │   ├── base.py                 # BaseModule (tüm modüllerin arayüzü)
 │   │   └── gmb_reviews/            # Modül 1: GMB Yorum Yanıtlama ✅
-│   │       ├── __init__.py
-│   │       ├── service.py          # Kendi servisleri
-│   │       ├── processor.py        # Kendi iş akışı
-│   │       └── mock.py             # Kendi mock'u
+│   │       ├── __init__.py          # GMBModule sınıfı
+│   │       ├── processor.py        # İş akışı (ReviewProcessor)
+│   │       └── mock.py             # Sahte yorum üretici (MockGMB)
 │   └── services/                   # Ortak servisler (tüm modüller kullanır)
 │       ├── airtable_service.py     # Airtable CRUD
-│       └── llm_service.py          # LLM çağrıları
+│       ├── llm_service.py          # LLM çağrıları (Groq)
+│       ├── seo_service.py          # SEO skorlama
+│       └── sentiment_service.py    # Sentiment analizi
 ├── dashboard/                      # Streamlit geliştirme dashboard'u
 │   ├── app.py
 │   ├── views/
@@ -55,10 +56,12 @@ GMB/
 ├── scripts/
 │   └── seed_data.py
 ├── docs/
-│   └── merkezi-mimari-rehberi.md   # Detaylı mimari dokümanı
+│   ├── merkezi-mimari-rehberi.md   # Detaylı mimari tasarım
+│   └── proje-rehberi.md            # Junior seviyesi proje rehberi
 ├── requirements.txt
 ├── .env.example
 ├── .env
+├── .gitignore
 ├── CLAUDE.md                       # BU DOSYA
 └── TODO.md
 ```
@@ -89,9 +92,10 @@ GMB/
 
 ### Modül 1: GMB Yorum Yanıtlama ✅ (Tamamlandı)
 - Google My Business yorumlarına SEO-GEO uyumlu otomatik yanıt
-- Sentiment analizi, özelleştirilebilir prompt
-- Mock veri üretici (test için)
-- Gerçek GMB API entegrasyonu: Bekliyor
+- Sentiment analizi, özelleştirilebilir prompt, retry logic
+- Modüler mimariye taşındı: `modules/gmb_reviews/`
+- GMB_Active checkbox ile Airtable'dan açılıp kapatılabilir
+- Mock veri üretici (test için) — Gerçek GMB API: Bekliyor
 
 ### Gelecek Modüller (Planlama Aşaması)
 - Modül belirtilmedi. Her modül bu listeye eklenecek.
